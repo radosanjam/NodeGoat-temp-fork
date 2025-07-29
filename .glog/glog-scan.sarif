@@ -1,0 +1,720 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Glog.AI",
+          "organization": "Glog.AI",
+          "fullName": "Glog, Making software more secure",
+          "version": "1.0.0",
+          "semanticVersion": "1.0.0",
+          "informationUri": "https://www.glog.ai",
+          "rules": [
+            {
+              "id": "glog-1317193a-b412-4058-8fb5-1d230f4ed90a",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Code Injection Vulnerability in GitHub Actions Using Untrusted `github` Context Data\" refers to a security flaw where untrusted data from the `github` context is used in a way that could allow an attacker to execute arbitrary code. In the provided example, the `github.actor` is used directly in a shell command without proper sanitization, which could lead to command injection if an attacker is able to manipulate this value.\n\n### Mitigation Advice\n\nTo mitigate this vulnerability, ensure that any data from the `github` context is properly sanitized before being used in shell commands. Avoid using untrusted data directly in shell commands. Instead, use parameterized inputs or escape the data properly.\n\n### Source Code Fix Recommendation\n\nTo fix the specific vulnerability in the provided code snippet, you can use the following approach:\n\n```yaml\nrun: |\n  echo \"${{ inputs.github-token }}\" | docker login ghcr.io -u \"${{ github.actor }}\" --password-stdin\n```\n\nIn this fix, the `${{ github.actor }}` is enclosed in double quotes to prevent command injection. Additionally, consider using a more secure method to handle sensitive data and avoid exposing it in logs.\n\n### Library Dependencies\n\nThe code example provided is a part of a GitHub Actions workflow and does not require any additional JavaScript library dependencies to execute. It relies on the GitHub Actions environment and Docker.\n\n### OWASP Resources\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-77: Improper Neutralization of Special Elements used in a Command ('Command Injection')](https://cwe.mitre.org/data/definitions/77.html)"
+              },
+              "properties": {
+                "tags": [
+                  "yaml.github-actions.security.run-shell-injection.run-shell-injection"
+                ]
+              }
+            },
+            {
+              "id": "glog-3ab0c82b-8d62-4206-91ce-e53a93cb1610",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Relative WORKDIR Path Vulnerability\" in JavaScript applications typically arises in Dockerfile configurations where the `WORKDIR` is set using a relative path. This can lead to security issues, especially when combined with other Dockerfile instructions like `COPY`. If the `WORKDIR` is not set to an absolute path, it can result in unexpected behavior, such as overwriting files or directories, or even executing unintended scripts, which can be exploited by attackers to compromise the application.\n\n### General Mitigation Advice\n\n1. **Use Absolute Paths**: Always set the `WORKDIR` to an absolute path to avoid ambiguity and potential security risks.\n2. **Validate Inputs**: Ensure that any inputs used to set paths are validated and sanitized.\n3. **Limit Permissions**: Run the application with the least privileges necessary to minimize the impact of any potential exploit.\n4. **Regular Updates**: Keep your Docker images and dependencies up to date to mitigate known vulnerabilities.\n\n### Source Code Fix Recommendation\n\nTo mitigate the \"Relative WORKDIR Path Vulnerability\", modify the Dockerfile to use an absolute path for the `WORKDIR`:\n\n```dockerfile\n# Before\nWORKDIR $WORKDIR\nCOPY package*.json $WORKDIR\n\n# After\nWORKDIR /app\nCOPY package*.json /app\n```\n\n### Library Dependencies\n\nThe code example provided does not directly require any JavaScript library dependencies to execute properly. However, if the `package*.json` files are used to install dependencies, ensure that the `package.json` and `package-lock.json` files are correctly configured with the necessary dependencies for your application.\n\n### OWASP Resources\n\n- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')](https://cwe.mitre.org/data/definitions/22.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.use-absolute-workdir"
+                ]
+              }
+            },
+            {
+              "id": "glog-dce795ee-bb40-4d7c-9048-c92509d87920",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Code Injection Vulnerability in GitHub Actions Using Untrusted `github` Context Data\" refers to a security flaw where untrusted data from the `github` context is used to construct shell commands. This can lead to code injection if the data is not properly sanitized, allowing an attacker to execute arbitrary commands within the GitHub Actions environment. In the provided code snippet, the `TOOL_CMD` variable is constructed using inputs from the `github` context without proper validation or sanitization, making it susceptible to injection attacks.\n\n### General Mitigation Advice\n\n1. **Input Validation and Sanitization**: Always validate and sanitize inputs from untrusted sources. Use whitelisting to allow only expected values.\n2. **Use Safe APIs**: Prefer using APIs or libraries that handle input safely, avoiding direct shell command construction.\n3. **Environment Isolation**: Run potentially dangerous commands in isolated environments where possible, such as containers with limited permissions.\n4. **Least Privilege Principle**: Ensure that the GitHub Actions workflow has the minimum permissions necessary to perform its tasks.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, avoid constructing shell commands directly with untrusted input. Instead, use parameterized commands or a safer method to handle inputs. Here's a revised version of the code:\n\n```yaml\nrun: |\n  TOOL_CMD=\"${{ github.action_path }}/glog.sh scan --path $GITHUB_WORKSPACE\"\n  ARGS=()\n  if [ ! -z \"${{ inputs.lang }}\" ]; then\n    ARGS+=(\"--lang\" \"${{ inputs.lang }}\")\n  fi\n  if [ ! -z \"${{ inputs.ignore }}\" ]; then\n    ARGS+=(\"--ignore\" \"${{ inputs.ignore }}\")\n  fi\n  if [ ! -z \"${{ inputs.client }}\" ]; then\n    ARGS+=(\"--client\" \"${{ inputs.client }}\")\n  fi\n  \"$TOOL_CMD\" \"${ARGS[@]}\"\n```\n\n### Library Dependencies\n\nThe code example provided is a shell script executed within a GitHub Actions workflow and does not require additional JavaScript library dependencies to execute. However, ensure that the `glog.sh` script and any tools it depends on are available in the environment.\n\n### OWASP Resources\n\n- [OWASP Command Injection](https://owasp.org/www-community/attacks/Command_Injection)\n- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-77: Improper Neutralization of Special Elements used in a Command ('Command Injection')](https://cwe.mitre.org/data/definitions/77.html)"
+              },
+              "properties": {
+                "tags": [
+                  "yaml.github-actions.security.run-shell-injection.run-shell-injection"
+                ]
+              }
+            },
+            {
+              "id": "glog-fcfb39a1-c00d-45f0-b210-49bb6f9fa710",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Relative WORKDIR Path Vulnerability\" in JavaScript, particularly in Dockerfile configurations, arises when the `WORKDIR` is set using a relative path. This can lead to security issues, especially when combined with commands like `COPY` and `RUN`, which may inadvertently expose sensitive files or execute unintended scripts. This vulnerability can be exploited if an attacker can manipulate the context in which the Docker image is built, potentially leading to unauthorized access or code execution.\n\n### General Mitigation Advice\n\n1. **Use Absolute Paths**: Always use absolute paths for `WORKDIR` to avoid ambiguity and ensure that the context is well-defined.\n2. **Validate Inputs**: Ensure that any inputs or paths used in the Dockerfile are validated and sanitized.\n3. **Limit Build Context**: Use a `.dockerignore` file to exclude unnecessary files from the build context.\n4. **Least Privilege Principle**: Run containers with the least privileges necessary and avoid running as root.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability in the provided Dockerfile snippet, modify the `WORKDIR` to use an absolute path:\n\n```dockerfile\n# Set an absolute path for WORKDIR\nWORKDIR /app\n\n# Copy package files to the WORKDIR\nCOPY package*.json /app\n\n# Install production dependencies without cache\nRUN npm install --production --no-cache\n```\n\n### Library Dependencies\n\nThe code example requires the following library dependencies to execute properly:\n\n- `npm`: Node Package Manager, used to install the necessary Node.js packages specified in `package.json`.\n\n### OWASP Resources\n\n- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)\n- [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')](https://cwe.mitre.org/data/definitions/22.html)\n- [CWE-73: External Control of File Name or Path](https://cwe.mitre.org/data/definitions/73.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.use-absolute-workdir"
+                ]
+              }
+            },
+            {
+              "id": "glog-e0b0d612-b5e0-45af-94c6-534d1d30600f",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Relative WORKDIR Path Vulnerability\" in JavaScript, particularly in the context of Dockerfiles, arises when the `WORKDIR` is set to a relative path. This can lead to unexpected behavior or security issues, especially when combined with commands that change ownership or copy files. If the `WORKDIR` is not set to an absolute path, it can lead to directory traversal vulnerabilities or unintentional file overwrites.\n\n### General Mitigation Advice\n\n1. **Use Absolute Paths**: Always set the `WORKDIR` to an absolute path to avoid ambiguity and potential security risks.\n2. **Validate Inputs**: Ensure that any inputs used to set paths are validated and sanitized.\n3. **Least Privilege Principle**: Run processes with the least privileges necessary to limit the impact of a potential compromise.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability in the provided Dockerfile commands, ensure that the `WORKDIR` is set to an absolute path:\n\n```dockerfile\n# Set WORKDIR to an absolute path\nWORKDIR /app\n\n# Change ownership of the WORKDIR\nRUN chown $USER:$USER /app\n\n# Copy files to the WORKDIR with the correct ownership\nCOPY --chown=node . /app\n```\n\n### Library Dependencies\n\nThe provided code example does not require any specific JavaScript library dependencies to execute properly, as it is related to Dockerfile configuration rather than JavaScript code execution.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')](https://cwe.mitre.org/data/definitions/22.html)\n- [CWE-73: External Control of File Name or Path](https://cwe.mitre.org/data/definitions/73.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.use-absolute-workdir"
+                ]
+              }
+            },
+            {
+              "id": "glog-0e786cd9-2535-492c-a14f-a3e68aa782f1",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Relative WORKDIR Path Vulnerability\" in JavaScript applications typically arises in Dockerfile configurations where the `WORKDIR` is set using a relative path. This can lead to unexpected behavior or security issues, especially when combined with other Dockerfile instructions like `COPY`. In the provided example, the `WORKDIR` is set using a variable `$WORKDIR`, which may not be properly defined or sanitized, leading to potential directory traversal or unintended directory usage.\n\n### General Mitigation Advice\n\n1. **Use Absolute Paths**: Always use absolute paths for `WORKDIR` to avoid ambiguity and potential security risks.\n2. **Validate Environment Variables**: Ensure that any environment variables used in paths are validated and sanitized.\n3. **Limit Scope**: Minimize the scope of the `WORKDIR` to only necessary directories.\n4. **Use Docker Best Practices**: Follow Docker's best practices for writing secure Dockerfiles, such as minimizing the number of layers and using official base images.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, modify the Dockerfile to use an absolute path for `WORKDIR`:\n\n```dockerfile\nWORKDIR /usr/src/app\nCOPY --from=0 /usr/src/app/node_modules node_modules\n```\n\n### Library Dependencies\n\nThe code example provided does not directly list any JavaScript library dependencies. However, typical dependencies for a Node.js application might include:\n\n- `express`: A web framework for Node.js.\n- `dotenv`: For loading environment variables.\n- `mongoose`: For MongoDB object modeling.\n- `cors`: For enabling Cross-Origin Resource Sharing.\n\nThese dependencies should be listed in a `package.json` file for the Node.js application.\n\n### OWASP Resources\n\n- [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')](https://cwe.mitre.org/data/definitions/22.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.use-absolute-workdir"
+                ]
+              }
+            },
+            {
+              "id": "glog-66566c07-e799-4969-9bda-247a016f4ccb",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Cryptographically Weak RNG Vulnerability\" in JavaScript refers to the use of `Math.random()`, which is not suitable for cryptographic purposes due to its predictable nature. `Math.random()` generates pseudo-random numbers that can be guessed by attackers, leading to potential security vulnerabilities, especially when used for generating tokens, passwords, or any sensitive data.\n\n### General Mitigation Advice\n\nTo mitigate this vulnerability, use a cryptographically secure random number generator. In JavaScript, you can use the `crypto` module available in Node.js or the `window.crypto` object in browsers to generate secure random numbers.\n\n### Source Code Fix Recommendation\n\nReplace the use of `Math.random()` with a cryptographically secure alternative. Here's how you can modify the code:\n\n```javascript\n// Import the crypto module (Node.js)\nconst crypto = require('crypto');\n\n// Function to generate a secure random number\nfunction secureRandomNumber(max) {\n  return crypto.randomInt(0, max);\n}\n\n// Use the secure random number generator\nconst month = (secureRandomNumber(10) + today.getMonth()) % 12;\n```\n\nFor browser environments, you can use:\n\n```javascript\n// Function to generate a secure random number\nfunction secureRandomNumber(max) {\n  const array = new Uint32Array(1);\n  window.crypto.getRandomValues(array);\n  return array[0] % max;\n}\n\n// Use the secure random number generator\nconst month = (secureRandomNumber(10) + today.getMonth()) % 12;\n```\n\n### Library Dependencies\n\nFor the Node.js example, the `crypto` module is a built-in module and does not require additional installation. For the browser example, no additional libraries are required as `window.crypto` is a built-in API.\n\n### OWASP Resources\n\n- [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)\n- [OWASP Top Ten 2021 - A02:2021-Cryptographic Failures](https://owasp.org/Top10/A02_2021-Cryptographic_Failures/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-338: Use of Cryptographically Weak Pseudo-Random Number Generator (PRNG)](https://cwe.mitre.org/data/definitions/338.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.node_insecure_random_generator"
+                ]
+              }
+            },
+            {
+              "id": "glog-5b829174-922c-4a65-88bc-239ac8a514a7",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Cryptographically Weak RNG Vulnerability\" in JavaScript refers to the use of random number generators (RNGs) that are not suitable for cryptographic purposes. The `Math.random()` function in JavaScript is a common example of a non-cryptographic RNG. It is designed for simple tasks like simulations or games, but not for security-sensitive applications. Using `Math.random()` for generating keys, tokens, or any other security-related values can lead to vulnerabilities, as the generated numbers can be predicted by attackers.\n\n### General Mitigation Advice\n\nTo mitigate this vulnerability, use a cryptographically secure random number generator. In JavaScript, you can use the `crypto` module available in Node.js or the `window.crypto` object in web browsers to generate secure random numbers.\n\n### Source Code Fix Recommendation\n\nReplace the use of `Math.random()` with a cryptographically secure RNG. Here's how you can modify the code:\n\n```javascript\n// Import the crypto module (Node.js)\nconst crypto = require('crypto');\n\n// Generate a secure random year\nconst randomBytes = crypto.randomBytes(4);\nconst randomValue = randomBytes.readUInt32BE(0) / 0xFFFFFFFF;\nconst year = Math.ceil(randomValue * 30) + today.getFullYear();\n```\n\nFor browser environments, you can use:\n\n```javascript\n// Generate a secure random year (Browser)\nconst array = new Uint32Array(1);\nwindow.crypto.getRandomValues(array);\nconst randomValue = array[0] / 0xFFFFFFFF;\nconst year = Math.ceil(randomValue * 30) + today.getFullYear();\n```\n\n### Library Dependencies\n\nFor the Node.js environment, the `crypto` module is a built-in module and does not require additional installation. For browser environments, the `window.crypto` object is natively available in modern browsers.\n\n### OWASP Resources\n\n- [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)\n- [OWASP Top Ten 2021](https://owasp.org/Top10/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-338: Use of Cryptographically Weak Pseudo-Random Number Generator (PRNG)](https://cwe.mitre.org/data/definitions/338.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.node_insecure_random_generator"
+                ]
+              }
+            },
+            {
+              "id": "glog-1f724c3a-36f5-4b54-b64d-d92ef567ca59",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\n\"XSS from user-controlled HTML data\" is a type of Cross-Site Scripting (XSS) vulnerability that occurs when an application includes untrusted data in a web page without proper validation or escaping. In JavaScript, this can happen when user input is directly inserted into HTML or JavaScript code, allowing attackers to execute arbitrary scripts in the context of the user's browser.\n\n### Vulnerability Sink\n\nThe specific vulnerability sink in the provided code is the use of template literals to construct a MongoDB query with user-controlled data (`parsedUserId` and `threshold`). This can lead to injection attacks if the input is not properly sanitized.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Validate and sanitize all user inputs. Ensure that inputs conform to expected formats and types.\n2. **Output Encoding**: Encode data before rendering it in the HTML context to prevent XSS.\n3. **Use Parameterized Queries**: Avoid constructing queries with string concatenation. Use parameterized queries or query builders that automatically handle escaping.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability, use parameterized queries or a query builder that safely handles user input. Here's a revised version of the code using a parameterized query approach:\n\n```javascript\nconst userId = parseInt(parsedUserId, 10); // Ensure userId is an integer\nconst stockThreshold = parseFloat(threshold); // Ensure threshold is a float\n\nreturn {\n    $where: function() {\n        return this.userId === userId && this.stocks > stockThreshold;\n    }\n};\n```\n\n### Library Dependencies\n\nThe code example does not explicitly require any additional libraries to execute properly, assuming it is part of a MongoDB query operation within a Node.js environment. However, ensure that the following are available:\n\n- **Node.js**: The runtime environment for executing JavaScript on the server.\n- **MongoDB**: The database where the query is executed.\n\n### OWASP Resources\n\n- [OWASP Cross Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/)\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.raw-html-concat"
+                ]
+              }
+            },
+            {
+              "id": "glog-106cedcc-d88e-4fd4-abdc-812648e8fc22",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nA **Code Injection Vulnerability** occurs when untrusted input is executed as code by an application. In JavaScript, this often happens when using functions like `eval()`, which can execute arbitrary code. If an attacker can control the input to `eval()`, they can execute malicious code on the server, leading to potential data breaches, unauthorized actions, or system compromise.\n\n### Mitigation Advice\n\n1. **Avoid `eval()`:** Refrain from using `eval()` or similar functions that execute code from strings.\n2. **Input Validation and Sanitization:** Always validate and sanitize user inputs to ensure they conform to expected formats and do not contain malicious code.\n3. **Use JSON Parsing:** If the input is expected to be a JSON object, use `JSON.parse()` instead of `eval()`.\n4. **Use a Secure Library:** Consider using libraries that safely handle dynamic code execution, if necessary.\n\n### Source Code Fix Recommendation\n\nReplace the use of `eval()` with `JSON.parse()` if the input is expected to be a JSON string:\n\n```javascript\nconst preTax = JSON.parse(req.body.preTax);\n```\n\nEnsure that `req.body.preTax` is a valid JSON string before parsing to prevent errors.\n\n### Library Dependencies\n\nThe code example does not require any additional library dependencies to execute properly, as it relies on native JavaScript functionality.\n\n### Relevant OWASP Resources\n\n- [OWASP Code Injection](https://owasp.org/www-community/attacks/Code_Injection)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-94: Improper Control of Generation of Code ('Code Injection')](https://cwe.mitre.org/data/definitions/94.html)"
+              },
+              "properties": {
+                "tags": [
+                  "javascript.browser.security.eval-detected.eval-detected"
+                ]
+              }
+            },
+            {
+              "id": "glog-ac6dae98-0458-43ff-b5b8-b8cb49447162",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"Cryptographically Weak RNG Vulnerability\" in JavaScript arises when the `Math.random()` function is used for security-sensitive operations. `Math.random()` is not suitable for cryptographic purposes because it does not provide sufficient randomness and can be predictable. This can lead to vulnerabilities in applications where randomness is crucial, such as in generating tokens, passwords, or any other security-related data.\n\n### General Mitigation Advice\n\nTo mitigate this vulnerability, use a cryptographically secure random number generator. In JavaScript, you can use the `crypto` module available in Node.js or the `window.crypto` object in browsers to generate secure random numbers.\n\n### Source Code Fix Recommendation\n\nReplace the use of `Math.random()` with a cryptographically secure random number generator. Here's how you can modify the code:\n\n```javascript\n// Node.js environment\nconst crypto = require('crypto');\n\nfunction getRandomDay(today) {\n  const randomBuffer = crypto.randomBytes(1);\n  const randomValue = randomBuffer[0] / 256;\n  const day = (Math.floor(randomValue * 10) + today.getDay()) % 29;\n  return day;\n}\n\n// Example usage\nconst today = new Date();\nconsole.log(getRandomDay(today));\n```\n\nFor a browser environment, you can use:\n\n```javascript\nfunction getRandomDay(today) {\n  const randomArray = new Uint8Array(1);\n  window.crypto.getRandomValues(randomArray);\n  const randomValue = randomArray[0] / 256;\n  const day = (Math.floor(randomValue * 10) + today.getDay()) % 29;\n  return day;\n}\n\n// Example usage\nconst today = new Date();\nconsole.log(getRandomDay(today));\n```\n\n### Library Dependencies\n\n- For Node.js: `crypto` module (built-in, no additional installation required).\n\n### OWASP Resources\n\n- [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)\n- [OWASP Top Ten 2021: A02:2021-Cryptographic Failures](https://owasp.org/Top10/A02_2021-Cryptographic_Failures/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-338: Use of Cryptographically Weak Pseudo-Random Number Generator (PRNG)](https://cwe.mitre.org/data/definitions/338.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.node_insecure_random_generator"
+                ]
+              }
+            },
+            {
+              "id": "glog-3b854d42-4c1e-435f-b1a1-cd94af57b89c",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"User-Controllable Data Flow to `eval` Vulnerability\" in JavaScript occurs when user input is passed directly to the `eval` function. This can lead to severe security risks, as `eval` will execute any JavaScript code it receives. If an attacker can control the input to `eval`, they can execute arbitrary code on the server, potentially leading to data theft, data corruption, or a complete system compromise.\n\n### General Mitigation Advice\n\n1. **Avoid `eval`:** The best practice is to avoid using `eval` altogether. There are usually safer alternatives to achieve the same functionality.\n2. **Input Validation and Sanitization:** If `eval` must be used, ensure that the input is strictly validated and sanitized to prevent malicious code execution.\n3. **Use JSON Parsing:** If the input is expected to be a JSON object, use `JSON.parse()` instead of `eval`.\n4. **Use a JavaScript Linter:** Tools like ESLint can help identify and prevent the use of `eval` in your codebase.\n\n### Source Code Fix Recommendation\n\nReplace the use of `eval` with a safer alternative. If the input is expected to be a number or a JSON object, use appropriate parsing methods:\n\n```javascript\n// Assuming preTax is expected to be a number\nconst preTax = parseFloat(req.body.preTax);\n\n// If preTax is expected to be a JSON object\n// const preTax = JSON.parse(req.body.preTax);\n```\n\n### Library Dependencies\n\nThe provided code snippet does not require any additional library dependencies to execute properly, as it relies on native JavaScript and Node.js functionality.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')](https://cwe.mitre.org/data/definitions/95.html)"
+              },
+              "properties": {
+                "tags": [
+                  "javascript.lang.security.audit.code-string-concat.code-string-concat"
+                ]
+              }
+            },
+            {
+              "id": "glog-e992905d-7434-44a1-8ae5-098caa6069f5",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nThe \"XSS Vulnerability from User-Controlled HTML Data\" occurs when an application includes untrusted data in a web page without proper validation or escaping, allowing an attacker to execute arbitrary JavaScript in the context of the user's browser. This can lead to session hijacking, defacement, or redirection to malicious sites.\n\nIn the provided code example, the vulnerability arises from the direct concatenation of user input (`user`) into an error message. If `user` is not properly sanitized, an attacker could inject malicious scripts.\n\n### General Mitigation Advice\n\n1. **Input Validation**: Validate all user inputs on the server side. Ensure that inputs conform to expected formats and reject any that do not.\n2. **Output Encoding**: Encode data before rendering it in the browser. Use libraries or frameworks that automatically handle encoding.\n3. **Content Security Policy (CSP)**: Implement CSP headers to restrict the sources from which scripts can be loaded.\n4. **Use Security Libraries**: Utilize libraries that provide built-in protection against XSS.\n\n### Source Code Fix Recommendation\n\nTo mitigate the vulnerability in the provided code, ensure that user input is properly escaped before being included in the error message. Here is a revised version of the code:\n\n```javascript\nconst escapeHtml = (str) => {\n  return str.replace(/&/g, \"&amp;\")\n            .replace(/</g, \"&lt;\")\n            .replace(/>/g, \"&gt;\")\n            .replace(/\"/g, \"&quot;\")\n            .replace(/'/g, \"&#039;\");\n};\n\nconst noSuchUserError = new Error(\"User: \" + escapeHtml(user) + \" does not exist\");\n```\n\n### Library Dependencies\n\nThe code example provided does not require any external library dependencies to execute properly. The `escapeHtml` function is implemented using native JavaScript.\n\n### OWASP Resources\n\n- [OWASP Cross-Site Scripting (XSS) Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n- [OWASP Content Security Policy (CSP) Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')](https://cwe.mitre.org/data/definitions/79.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.raw-html-concat"
+                ]
+              }
+            },
+            {
+              "id": "glog-085edbce-6521-4a98-a5a9-2e389d3cc3d8",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nA \"Server-Side or Remote Code Injection Vulnerability\" in JavaScript occurs when untrusted input is executed as code on the server. This can lead to unauthorized actions, data breaches, or complete system compromise. In the provided code example, the use of `eval()` with user input (`req.body.preTax`) is a critical security flaw. `eval()` executes the string as JavaScript code, which can be exploited by an attacker to run arbitrary code on the server.\n\n### General Mitigation Advice\n\n1. **Avoid `eval()`:** Refrain from using `eval()` or similar functions that execute code from strings.\n2. **Input Validation and Sanitization:** Always validate and sanitize user inputs to ensure they conform to expected formats and types.\n3. **Use Safe Parsing Methods:** If you need to parse JSON or other data formats, use safe parsing methods like `JSON.parse()` instead of `eval()`.\n4. **Least Privilege Principle:** Run your application with the least privileges necessary to limit the impact of a potential compromise.\n5. **Security Libraries:** Use libraries and frameworks that provide built-in protection against code injection vulnerabilities.\n\n### Source Code Fix Recommendation\n\nReplace the use of `eval()` with a safer alternative. If `preTax` is expected to be a number, parse it using `parseFloat()` or `parseInt()`:\n\n```javascript\nconst preTax = parseFloat(req.body.preTax);\n```\n\nThis change ensures that only numeric values are processed, preventing the execution of arbitrary code.\n\n### Library Dependencies\n\nThe code example provided does not require any additional library dependencies to execute properly, as it relies on native JavaScript functions.\n\n### OWASP Resources\n\n- [OWASP Top Ten Project](https://owasp.org/www-project-top-ten/)\n- [OWASP Code Injection](https://owasp.org/www-community/attacks/Code_Injection)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-94: Improper Control of Generation of Code ('Code Injection')](https://cwe.mitre.org/data/definitions/94.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.eval_nodejs"
+                ]
+              }
+            },
+            {
+              "id": "glog-5f829f11-2f57-470f-877c-73253d727b75",
+              "help": {
+                "text": "",
+                "markdown": "### Description\n\nA \"Code Injection Vulnerability Detected\" in JavaScript occurs when untrusted input is executed as code. In the provided code snippet, the use of `eval()` with `req.body.afterTax` allows for arbitrary code execution if an attacker can control the input. This can lead to severe security risks, including data theft, unauthorized actions, and system compromise.\n\n### Mitigation Advice\n\n1. **Avoid `eval()`:** Refrain from using `eval()` or similar functions that execute code from strings.\n2. **Input Validation and Sanitization:** Validate and sanitize all user inputs to ensure they conform to expected formats and types.\n3. **Use Safe Parsing:** If the input is expected to be a number or a specific data type, use safe parsing methods like `parseFloat()` or `parseInt()` for numbers.\n4. **Use Libraries:** Consider using libraries that safely handle data parsing and manipulation.\n\n### Source Code Fix Recommendation\n\nReplace the use of `eval()` with a safer alternative. If `afterTax` is expected to be a number, parse it directly:\n\n```javascript\nconst afterTax = parseFloat(req.body.afterTax);\nif (isNaN(afterTax)) {\n    throw new Error('Invalid input: afterTax must be a number');\n}\n```\n\n### Library Dependencies\n\nThe provided code snippet does not require any additional library dependencies to execute properly, as it relies on native JavaScript and Node.js functionality.\n\n### Relevant Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n- [Common Weakness Enumeration: CWE-94](https://cwe.mitre.org/data/definitions/94.html)\n\nThese resources provide further information on code injection vulnerabilities and best practices for secure coding."
+              },
+              "properties": {
+                "tags": [
+                  "javascript.browser.security.eval-detected.eval-detected"
+                ]
+              }
+            },
+            {
+              "id": "glog-707380bb-a73b-4c01-a2a4-69a5dd73b29c",
+              "help": {
+                "text": "",
+                "markdown": "### Description of \"Redundant Assignment\" Vulnerability\n\nA \"Redundant Assignment\" vulnerability occurs when a variable is assigned a value that is never used or is overwritten before it is used. This can lead to confusion, maintenance challenges, and potential security risks if the redundant code is mistakenly assumed to be functional. In JavaScript, this can happen when variables are declared and assigned values that are not utilized in the program logic.\n\n### General Mitigation Advice\n\n1. **Code Review and Refactoring**: Regularly review code to identify and remove redundant assignments. Refactor code to ensure that all variable assignments are necessary and used appropriately.\n2. **Static Code Analysis**: Use static code analysis tools to automatically detect redundant assignments and other potential issues in the codebase.\n3. **Unit Testing**: Implement comprehensive unit tests to ensure that all parts of the code are executed and that redundant assignments are identified during test coverage analysis.\n\n### Source Code Fix Recommendation\n\nIn the provided code snippet, ensure that all imported modules and variables are used in the code logic. If `BenefitsDAO` or `environmentalScripts` are not used, consider removing them to avoid redundancy.\n\n```javascript\n// Assuming BenefitsDAO and environmentalScripts are used later in the code\nconst { BenefitsDAO } = require(\"../data/benefits-dao\");\nconst { environmentalScripts } = require(\"../../config/config\");\n\n// Example usage\nfunction getBenefits() {\n    return BenefitsDAO.getAllBenefits();\n}\n\nfunction loadScripts() {\n    return environmentalScripts.load();\n}\n```\n\nIf they are not used, remove the redundant assignments:\n\n```javascript\n// Remove unused imports if they are not used in the code\n// const { BenefitsDAO } = require(\"../data/benefits-dao\");\n// const { environmentalScripts } = require(\"../../config/config\");\n```\n\n### Library Dependencies\n\nTo execute the code example properly, the following library dependencies are required:\n\n- `../data/benefits-dao`: This should be a module that exports `BenefitsDAO`.\n- `../../config/config`: This should be a module that exports `environmentalScripts`.\n\nEnsure these modules are correctly implemented and available in the specified paths.\n\n### OWASP Resources\n\n- [OWASP Top Ten](https://owasp.org/www-project-top-ten/)\n\n### Common Weakness Enumeration (CWE)\n\n- [CWE-563: Assignment to Variable without Use](https://cwe.mitre.org/data/definitions/563.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.useless-assignment"
+                ]
+              }
+            }
+          ],
+          "language": "en-US",
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "isComprehensive": false
+        }
+      },
+      "language": "en-US",
+      "results": [
+        {
+          "ruleId": "glog-1317193a-b412-4058-8fb5-1d230f4ed90a",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Code Injection Vulnerability in GitHub Actions Using Untrusted `github` Context Data"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".github/glog-action/action.yml",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 41,
+                  "startColumn": 7,
+                  "endLine": 41,
+                  "endColumn": 108,
+                  "snippet": {
+                    "text": "      run: echo \"${{ inputs.github-token }}\" | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-3ab0c82b-8d62-4206-91ce-e53a93cb1610",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Relative WORKDIR Path Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 10,
+                  "endLine": 4,
+                  "endColumn": 5,
+                  "snippet": {
+                    "text": "WORKDIR $WORKDIR\nCOPY package*.json $WORKDIR"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-dce795ee-bb40-4d7c-9048-c92509d87920",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Code Injection Vulnerability in GitHub Actions Using Untrusted `github` Context Data"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".github/glog-action/action.yml",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 45,
+                  "startColumn": 7,
+                  "endLine": 56,
+                  "endColumn": 19,
+                  "snippet": {
+                    "text": "      run: |\n        TOOL_CMD=\"${{ github.action_path }}/glog.sh scan --path $GITHUB_WORKSPACE\"\n        if [ ! -z \"${{ inputs.lang }}\" ]; then\n          TOOL_CMD+=\" --lang ${{ inputs.lang }}\"\n        fi\n        if [ ! -z \"${{ inputs.ignore }}\" ]; then\n          TOOL_CMD+=\" --ignore ${{ inputs.ignore }}\"\n        fi\n        if [ ! -z \"${{ inputs.client }}\" ]; then\n          TOOL_CMD+=\" --client ${{ inputs.client }}\"\n        fi\n        $TOOL_CMD"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-fcfb39a1-c00d-45f0-b210-49bb6f9fa710",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Relative WORKDIR Path Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 4,
+                  "startColumn": 21,
+                  "endLine": 5,
+                  "endColumn": 4,
+                  "snippet": {
+                    "text": "COPY package*.json $WORKDIR\nRUN npm install --production --no-cache"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-e0b0d612-b5e0-45af-94c6-534d1d30600f",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Relative WORKDIR Path Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 24,
+                  "endLine": 13,
+                  "endColumn": 5,
+                  "snippet": {
+                    "text": "RUN chown $USER:$USER $WORKDIR\nCOPY --chown=node . $WORKDIR"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-0e786cd9-2535-492c-a14f-a3e68aa782f1",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Relative WORKDIR Path Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 10,
+                  "endLine": 11,
+                  "endColumn": 5,
+                  "snippet": {
+                    "text": "WORKDIR $WORKDIR\nCOPY --from=0 /usr/src/app/node_modules node_modules"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-66566c07-e799-4969-9bda-247a016f4ccb",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Cryptographically Weak RNG Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/data/user-dao.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 52,
+                  "startColumn": 35,
+                  "endLine": 52,
+                  "endColumn": 48,
+                  "snippet": {
+                    "text": "        const month = (Math.floor(Math.random() * 10) + today.getMonth()) % 12;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-5b829174-922c-4a65-88bc-239ac8a514a7",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Cryptographically Weak RNG Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/data/user-dao.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 53,
+                  "startColumn": 32,
+                  "endLine": 53,
+                  "endColumn": 45,
+                  "snippet": {
+                    "text": "        const year = Math.ceil(Math.random() * 30) + today.getFullYear();"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-1f724c3a-36f5-4b54-b64d-d92ef567ca59",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "XSS from user-controlled HTML data"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/data/allocations-dao.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 77,
+                  "startColumn": 17,
+                  "endLine": 79,
+                  "endColumn": 19,
+                  "snippet": {
+                    "text": "                return {\n                    $where: `this.userId == ${parsedUserId} && this.stocks > '${threshold}'`\n                };"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-106cedcc-d88e-4fd4-abdc-812648e8fc22",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Code Injection Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/routes/contributions.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 24,
+                  "endLine": 32,
+                  "endColumn": 45,
+                  "snippet": {
+                    "text": "        const preTax = eval(req.body.preTax);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-ac6dae98-0458-43ff-b5b8-b8cb49447162",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Cryptographically Weak RNG Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/data/user-dao.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 51,
+                  "startColumn": 33,
+                  "endLine": 51,
+                  "endColumn": 46,
+                  "snippet": {
+                    "text": "        const day = (Math.floor(Math.random() * 10) + today.getDay()) % 29;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-3b854d42-4c1e-435f-b1a1-cd94af57b89c",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "User-Controllable Data Flow to `eval` Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/routes/contributions.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 24,
+                  "endLine": 32,
+                  "endColumn": 45,
+                  "snippet": {
+                    "text": "        const preTax = eval(req.body.preTax);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-e992905d-7434-44a1-8ae5-098caa6069f5",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "XSS Vulnerability from User-Controlled HTML Data"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/data/user-dao.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 84,
+                  "startColumn": 17,
+                  "endLine": 84,
+                  "endColumn": 87,
+                  "snippet": {
+                    "text": "                const noSuchUserError = new Error(\"User: \" + user + \" does not exist\");"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-085edbce-6521-4a98-a5a9-2e389d3cc3d8",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Server-Side or Remote Code Injection Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/routes/contributions.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 24,
+                  "endLine": 32,
+                  "endColumn": 45,
+                  "snippet": {
+                    "text": "        const preTax = eval(req.body.preTax);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-5f829f11-2f57-470f-877c-73253d727b75",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Code Injection Vulnerability Detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/routes/contributions.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 33,
+                  "startColumn": 26,
+                  "endLine": 33,
+                  "endColumn": 49,
+                  "snippet": {
+                    "text": "        const afterTax = eval(req.body.afterTax);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-707380bb-a73b-4c01-a2a4-69a5dd73b29c",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Redundant Assignment"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/routes/benefits.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 6,
+                  "endColumn": 35,
+                  "snippet": {
+                    "text": "const {\n    BenefitsDAO\n} = require(\"../data/benefits-dao\");\nconst {\n    environmentalScripts\n} = require(\"../../config/config\");"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "requires login"
+          },
+          "properties": {}
+        }
+      ],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ]
+    }
+  ]
+}
